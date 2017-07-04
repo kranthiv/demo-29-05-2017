@@ -228,6 +228,7 @@ class MessagingService {
                     else if (msg.type === 'GET_JOURNEY') {
                         let journey = this.journeySVC.getJourney(msg.data);
                         journey.then((response) => {
+                            this.journeySVC.deleteJourney(response.id, response._rev);
                             port.postMessage({ type: "DOWNLOAD_JOURNEY", data: response });
                         }).catch(error => console.log(error));
                     }
@@ -14845,6 +14846,9 @@ class JourneyService {
             }).catch(error => console.log(error));
         });
     }
+    deleteJourney(docId, revId) {
+        return this.dbSVC.deleteDB(docId, revId);
+    }
     getJourney(journeyId) {
         return new Promise((resolve, reject) => {
             let j = this.dbSVC.get(journeyId);
@@ -14879,6 +14883,9 @@ class PouchdbService {
     }
     get(id) {
         return this.database.get(id);
+    }
+    deleteDB(documentId, revId) {
+        return this.database.remove(documentId, revId);
     }
     put(document) {
         return this.get(document.journeyId).then(result => {
